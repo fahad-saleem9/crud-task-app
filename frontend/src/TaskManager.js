@@ -7,7 +7,12 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import { ToastContainer } from "react-toastify";
-import { CreateTask, DeleteTaskById, GetAllTasks, UpdateTaskById } from "./api";
+import {
+  CreateTask,
+  DeleteTaskById,
+  GetAllTasks,
+  UpdateTaskById,
+} from "./api";
 import { notify } from "./utils";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -92,6 +97,25 @@ function TaskManager() {
     }
   };
 
+  const handleCheckAndUncheck = async (task) => {
+    try {
+      const updatedTask = { ...task, isDone: !task.isDone };
+      const { success, message } = await UpdateTaskById(task._id, updatedTask);
+
+      if (success) {
+        notify(message, "success");
+        setTasks((prevTasks) =>
+          prevTasks.map((t) => (t._id === task._id ? updatedTask : t))
+        );
+      } else {
+        notify(message, "error");
+      }
+    } catch (err) {
+      console.error("Error toggling task completion:", err);
+      notify("Failed to update task status", "error");
+    }
+  };
+
   const handleSearch = (e) => {
     const term = e.target.value.toLowerCase();
     setTasks(
@@ -145,7 +169,7 @@ function TaskManager() {
             <div>
               <button
                 onClick={() => handleCheckAndUncheck(item)}
-                className="btn btn-success btn-sm me-2"
+                className={`btn btn-sm me-2 ${item.isDone ? "btn-secondary" : "btn-success"}`}
               >
                 <FaCheck />
               </button>
